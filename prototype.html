@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en" x-data="app()" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JourneyTrails - Explore the World</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { 50:'#f0fdfa', 100:'#ccfbf1', 200:'#99f6e4', 300:'#5eead4', 400:'#2dd4bf', 500:'#0d9488', 600:'#0f766e', 700:'#115e59', 800:'#134e4a', 900:'#042f2e' },
+            accent: { 50:'#fff7ed', 100:'#ffedd5', 200:'#fed7aa', 300:'#fdba74', 400:'#fb923c', 500:'#f97316', 600:'#ea580c', 700:'#c2410c', 800:'#9a3412', 900:'#7c2d12' },
+          },
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+            inter: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [x-cloak] { display: none !important; }
+    body { font-family: 'Inter', sans-serif; }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Poppins', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, rgba(13,148,136,0.85) 0%, rgba(15,118,110,0.7) 50%, rgba(249,115,22,0.6) 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-up { animation: slideUp 0.6s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    .gallery-img { transition: transform 0.4s ease; }
+    .gallery-img:hover { transform: scale(1.05); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 4px; }
+    .filter-btn.active { background-color: #0d9488; color: white; }
+    .itinerary-line { position: relative; }
+    .itinerary-line::before { content: ''; position: absolute; left: 15px; top: 40px; bottom: 0; width: 2px; background: #0d9488; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+  <!-- ============================================================ -->
+  <!-- NAVIGATION -->
+  <!-- ============================================================ -->
+  <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+       :class="(scrolled || page !== 'home') ? 'bg-white shadow-lg' : 'bg-transparent'"
+       @scroll.window="scrolled = (window.pageYOffset > 50)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 md:h-20">
+        <!-- Logo -->
+        <a href="#" @click.prevent="page='home'; window.scrollTo(0,0)" class="flex items-center space-x-2 cursor-pointer">
+          <svg class="w-8 h-8" :class="(scrolled || page !== 'home') ? 'text-primary-600' : 'text-white'" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          <span class="text-xl font-poppins font-bold" :class="(scrolled || page !== 'home') ? 'text-primary-700' : 'text-white'">
+            Journey<span class="text-accent-500">Trails</span>
+          </span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex items-center space-x-8">
+          <template x-for="item in navItems" :key="item.id">
+            <a href="#" @click.prevent="page=item.id; window.scrollTo(0,0)"
+               class="font-medium transition-colors duration-200 relative group"
+               :class="[
+                 page === item.id ? ((scrolled || page !== 'home') ? 'text-primary-600' : 'text-accent-400') : ((scrolled || page !== 'home') ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white')
+               ]">
+              <span x-text="item.label"></span>
+              <span class="absolute -bottom-1 left-0 h-0.5 bg-accent-500 transition-all duration-300"
+                    :class="page === item.id ? 'w-full' : 'w-0 group-hover:w-full'"></span>
+            </a>
+          </template>
+          <a href="https://wa.me/919876543210?text=Hi%20JourneyTrails!%20I%27d%20like%20to%20know%20more%20about%20your%20packages."
+             target="_blank"
+             class="bg-accent-500 hover:bg-accent-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 shadow-lg shadow-accent-500/30 hover:shadow-accent-500/50">
+            Enquire Now
+          </a>
+        </div>
+
+        <!-- Mobile Toggle -->
+        <button @click="mobileMenu = !mobileMenu" class="md:hidden p-2 rounded-lg" :class="(scrolled || page !== 'home') ? 'text-gray-700' : 'text-white'">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path x-show="!mobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            <path x-show="mobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </nav>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div x-show="mobileMenu" x-cloak
+       class="fixed inset-0 z-[60] md:hidden"
+       @click.self="mobileMenu = false">
+    <!-- Backdrop -->
+    <div x-show="mobileMenu"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="mobileMenu = false"></div>
+    <!-- Sidebar -->
+    <div x-show="mobileMenu"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+         class="relative w-72 max-w-[80vw] h-full bg-white shadow-2xl flex flex-col">
+      <!-- Sidebar Header -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <a href="#" @click.prevent="page='home'; mobileMenu=false; window.scrollTo(0,0)" class="flex items-center space-x-2">
+          <svg class="w-7 h-7 text-primary-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span class="text-lg font-poppins font-bold text-primary-700">Journey<span class="text-accent-500">Trails</span></span>
+        </a>
+        <button @click="mobileMenu = false" class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- Sidebar Links -->
+      <div class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <template x-for="item in navItems" :key="item.id">
+          <a href="#" @click.prevent="page=item.id; mobileMenu=false; window.scrollTo(0,0)"
+             class="flex items-center px-4 py-3.5 rounded-xl font-medium transition-colors"
+             :class="page === item.id ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50'">
+            <svg x-show="item.id==='home'" class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>
+            <svg x-show="item.id==='packages'" class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <svg x-show="item.id==='tours'" class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+            <svg x-show="item.id==='about'" class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span x-text="item.label"></span>
+          </a>
+        </template>
+      </div>
+      <!-- Sidebar Footer -->
+      <div class="px-4 py-5 border-t border-gray-100">
+        <a href="https://wa.me/919876543210" target="_blank"
+           class="flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3.5 rounded-xl font-semibold transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+          Enquire on WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FLOATING WHATSAPP BUTTON -->
+  <!-- ============================================================ -->
+  <a href="https://wa.me/919876543210?text=Hi%20JourneyTrails!%20I%27d%20like%20to%20know%20more."
+     target="_blank"
+     class="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl shadow-green-500/40 transition-all duration-300 hover:scale-110 group">
+    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+    <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white text-gray-800 text-sm font-semibold px-4 py-2 rounded-xl shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      Chat with us!
+    </span>
+  </a>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: HOME -->
+  <!-- ============================================================ -->
+  <div x-show="page==='home'" x-cloak class="fade-in">
+
+    <!-- HERO -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <div class="absolute inset-0">
+        <img src="https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&q=80" alt="Travel Hero" class="w-full h-full object-cover">
+        <div class="hero-gradient absolute inset-0"></div>
+      </div>
+      <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <p class="text-accent-300 font-semibold text-lg mb-4 tracking-widest uppercase slide-up">Explore The World With Us</p>
+        <h1 class="text-4xl sm:text-5xl md:text-7xl font-poppins font-extrabold text-white leading-tight mb-6 slide-up">
+          Wander More,<br>Worry <span class="text-accent-400">Less</span>
+        </h1>
+        <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-10 slide-up">
+          Discover breathtaking destinations, curated travel packages, and unforgettable experiences crafted just for you.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 slide-up">
+          <a href="#" @click.prevent="page='packages'; window.scrollTo(0,0)"
+             class="bg-accent-500 hover:bg-accent-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 shadow-xl shadow-accent-500/30 hover:shadow-accent-500/50 hover:scale-105">
+            Explore Packages
+          </a>
+          <a href="https://wa.me/919876543210" target="_blank"
+             class="bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300">
+            Chat on WhatsApp
+          </a>
+        </div>
+      </div>
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      </div>
+    </section>
+
+    <!-- FEATURED PACKAGES -->
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+          <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Handpicked For You</p>
+          <h2 class="text-3xl md:text-5xl font-poppins font-bold text-gray-900 mb-4">Featured Packages</h2>
+          <p class="text-gray-500 max-w-xl mx-auto">Explore our most popular travel packages, curated for every kind of traveler.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <template x-for="pkg in packages.slice(0,3)" :key="pkg.id">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md card-hover cursor-pointer border border-gray-100"
+                 @click="selectedPackage=pkg; page='detail'; window.scrollTo(0,0)">
+              <div class="relative overflow-hidden h-56">
+                <img :src="pkg.image" :alt="pkg.title" class="w-full h-full object-cover gallery-img">
+                <div class="absolute top-4 left-4 bg-accent-500 text-white text-xs font-bold px-3 py-1 rounded-full" x-text="pkg.tag"></div>
+                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-primary-700 text-sm font-bold px-3 py-1 rounded-full" x-text="pkg.duration"></div>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center text-sm text-gray-400 mb-2">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                  <span x-text="pkg.destination"></span>
+                </div>
+                <h3 class="font-poppins font-bold text-xl text-gray-900 mb-2" x-text="pkg.title"></h3>
+                <p class="text-gray-500 text-sm mb-4 line-clamp-2" x-text="pkg.description"></p>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-sm text-gray-400">Starting from</span>
+                    <p class="text-2xl font-bold text-primary-600" x-text="pkg.price"></p>
+                  </div>
+                  <button class="bg-primary-50 hover:bg-primary-100 text-primary-700 px-4 py-2 rounded-xl font-semibold text-sm transition-colors">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+        <div class="text-center mt-12">
+          <a href="#" @click.prevent="page='packages'; window.scrollTo(0,0)"
+             class="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold text-lg group">
+            View All Packages
+            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- POPULAR DESTINATIONS -->
+    <section class="py-20 px-4 bg-gray-50">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+          <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Where To Go</p>
+          <h2 class="text-3xl md:text-5xl font-poppins font-bold text-gray-900 mb-4">Popular Destinations</h2>
+          <p class="text-gray-500 max-w-xl mx-auto">From serene beaches to misty mountains, find your perfect escape.</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <template x-for="dest in destinations" :key="dest.name">
+            <div class="relative group rounded-2xl overflow-hidden cursor-pointer"
+                 :class="dest.span ? 'md:col-span-2 md:row-span-2 h-64 md:h-full' : 'h-48 md:h-64'"
+                 @click="activeFilter='destination'; filterValue=dest.name; page='packages'; window.scrollTo(0,0)">
+              <img :src="dest.image" :alt="dest.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              <div class="absolute bottom-4 left-4 right-4">
+                <h3 class="font-poppins font-bold text-white text-lg md:text-xl" x-text="dest.name"></h3>
+                <p class="text-white/70 text-sm" x-text="dest.count + ' Packages'"></p>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY CHOOSE US -->
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+          <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Why JourneyTrails</p>
+          <h2 class="text-3xl md:text-5xl font-poppins font-bold text-gray-900 mb-4">Travel With Confidence</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div class="text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors duration-300">
+            <div class="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold text-lg mb-2">Trusted Agency</h3>
+            <p class="text-gray-500 text-sm">Years of experience delivering unforgettable travel experiences with utmost trust.</p>
+          </div>
+          <div class="text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors duration-300">
+            <div class="w-16 h-16 bg-accent-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <svg class="w-8 h-8 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold text-lg mb-2">Best Prices</h3>
+            <p class="text-gray-500 text-sm">Competitive pricing with transparent costs. No hidden charges, ever.</p>
+          </div>
+          <div class="text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors duration-300">
+            <div class="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold text-lg mb-2">24/7 Support</h3>
+            <p class="text-gray-500 text-sm">Instant support on WhatsApp. We are always just a message away.</p>
+          </div>
+          <div class="text-center p-6 rounded-2xl hover:bg-primary-50 transition-colors duration-300">
+            <div class="w-16 h-16 bg-accent-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <svg class="w-8 h-8 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold text-lg mb-2">Curated Trips</h3>
+            <p class="text-gray-500 text-sm">Handpicked itineraries designed by travel experts for maximum enjoyment.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="py-20 px-4 bg-primary-700">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+          <p class="text-accent-400 font-semibold text-sm tracking-widest uppercase mb-2">Testimonials</p>
+          <h2 class="text-3xl md:text-5xl font-poppins font-bold text-white mb-4">What Our Travelers Say</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <template x-for="t in testimonials" :key="t.name">
+            <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-8 text-white">
+              <div class="flex items-center mb-1">
+                <template x-for="i in 5"><svg class="w-5 h-5 text-accent-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></template>
+              </div>
+              <p class="text-white/80 mb-6 italic leading-relaxed" x-text="'&quot;' + t.text + '&quot;'"></p>
+              <div class="flex items-center">
+                <div class="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center font-bold text-lg" x-text="t.name.charAt(0)"></div>
+                <div class="ml-4">
+                  <p class="font-semibold" x-text="t.name"></p>
+                  <p class="text-white/60 text-sm" x-text="t.trip"></p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-5xl font-poppins font-bold text-gray-900 mb-6">Ready to Start Your Journey?</h2>
+        <p class="text-gray-500 text-lg mb-10 max-w-2xl mx-auto">
+          Tell us where you want to go and we'll craft the perfect trip for you. No forms, no hassle — just WhatsApp us!
+        </p>
+        <a href="https://wa.me/919876543210?text=Hi%20JourneyTrails!%20I%27m%20looking%20for%20a%20travel%20package.%20Can%20you%20help?"
+           target="_blank"
+           class="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 shadow-xl shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105">
+          <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Start Planning on WhatsApp
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: PACKAGES -->
+  <!-- ============================================================ -->
+  <div x-show="page==='packages'" x-cloak class="fade-in pt-24">
+    <section class="py-12 px-4">
+      <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+          <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Our Collection</p>
+          <h1 class="text-3xl md:text-5xl font-poppins font-bold text-gray-900 mb-4">Travel Packages</h1>
+          <p class="text-gray-500 max-w-xl mx-auto">Browse our carefully curated travel packages. Filter by destination, budget, or duration.</p>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="bg-white rounded-2xl shadow-md p-6 mb-10 border border-gray-100">
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <span class="text-sm font-semibold text-gray-700 mr-2">Filter by:</span>
+            <button @click="activeFilter='all'; filterValue=''"
+                    class="px-4 py-2 rounded-full text-sm font-medium border transition-colors"
+                    :class="activeFilter==='all' ? 'bg-primary-500 text-white border-primary-500' : 'border-gray-200 text-gray-600 hover:border-primary-300'">
+              All
+            </button>
+          </div>
+          <!-- Destination -->
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide w-full mb-1">Destination</span>
+            <template x-for="d in ['Kashmir', 'Kerala', 'Goa', 'Rajasthan', 'Andaman', 'Himachal']" :key="d">
+              <button @click="activeFilter='destination'; filterValue=d"
+                      class="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
+                      :class="activeFilter==='destination' && filterValue===d ? 'bg-primary-500 text-white border-primary-500' : 'border-gray-200 text-gray-600 hover:border-primary-300'"
+                      x-text="d"></button>
+            </template>
+          </div>
+          <!-- Budget -->
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide w-full mb-1">Budget</span>
+            <template x-for="b in budgetFilters" :key="b.label">
+              <button @click="activeFilter='budget'; filterValue=b.label"
+                      class="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
+                      :class="activeFilter==='budget' && filterValue===b.label ? 'bg-accent-500 text-white border-accent-500' : 'border-gray-200 text-gray-600 hover:border-accent-300'"
+                      x-text="b.label"></button>
+            </template>
+          </div>
+          <!-- Duration -->
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide w-full mb-1">Duration</span>
+            <template x-for="dur in ['3-4 Days', '5-6 Days', '7+ Days']" :key="dur">
+              <button @click="activeFilter='duration'; filterValue=dur"
+                      class="px-3 py-1.5 rounded-full text-xs font-medium border transition-colors"
+                      :class="activeFilter==='duration' && filterValue===dur ? 'bg-primary-500 text-white border-primary-500' : 'border-gray-200 text-gray-600 hover:border-primary-300'"
+                      x-text="dur"></button>
+            </template>
+          </div>
+        </div>
+
+        <!-- Results count -->
+        <p class="text-gray-500 text-sm mb-6">Showing <span class="font-semibold text-gray-800" x-text="filteredPackages().length"></span> packages</p>
+
+        <!-- PACKAGE GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <template x-for="pkg in filteredPackages()" :key="pkg.id">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md card-hover cursor-pointer border border-gray-100"
+                 @click="selectedPackage=pkg; page='detail'; window.scrollTo(0,0)">
+              <div class="relative overflow-hidden h-56">
+                <img :src="pkg.image" :alt="pkg.title" class="w-full h-full object-cover gallery-img">
+                <div class="absolute top-4 left-4 bg-accent-500 text-white text-xs font-bold px-3 py-1 rounded-full" x-text="pkg.tag"></div>
+                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-primary-700 text-sm font-bold px-3 py-1 rounded-full" x-text="pkg.duration"></div>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center text-sm text-gray-400 mb-2">
+                  <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                  <span x-text="pkg.destination"></span>
+                </div>
+                <h3 class="font-poppins font-bold text-xl text-gray-900 mb-2" x-text="pkg.title"></h3>
+                <p class="text-gray-500 text-sm mb-4 line-clamp-2" x-text="pkg.description"></p>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-sm text-gray-400">Starting from</span>
+                    <p class="text-2xl font-bold text-primary-600" x-text="pkg.price"></p>
+                  </div>
+                  <button class="bg-primary-50 hover:bg-primary-100 text-primary-700 px-4 py-2 rounded-xl font-semibold text-sm transition-colors">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Empty state -->
+        <div x-show="filteredPackages().length === 0" class="text-center py-16">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <h3 class="font-poppins font-bold text-xl text-gray-400 mb-2">No packages found</h3>
+          <p class="text-gray-400">Try adjusting your filters or <a href="#" @click.prevent="activeFilter='all'; filterValue=''" class="text-primary-600 underline">view all packages</a>.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: PACKAGE DETAIL -->
+  <!-- ============================================================ -->
+  <div x-show="page==='detail'" x-cloak class="fade-in pt-20">
+    <template x-if="selectedPackage">
+      <div>
+        <!-- Hero Image -->
+        <section class="relative h-[50vh] md:h-[60vh] overflow-hidden">
+          <img :src="selectedPackage.image" :alt="selectedPackage.title" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-6 md:p-12 max-w-7xl mx-auto">
+            <a href="#" @click.prevent="page='packages'; window.scrollTo(0,0)" class="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              Back to Packages
+            </a>
+            <div class="flex items-center gap-3 mb-3">
+              <span class="bg-accent-500 text-white text-xs font-bold px-3 py-1 rounded-full" x-text="selectedPackage.tag"></span>
+              <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full" x-text="selectedPackage.duration"></span>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-poppins font-bold text-white mb-2" x-text="selectedPackage.title"></h1>
+            <div class="flex items-center text-white/70 text-sm">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+              <span x-text="selectedPackage.destination"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Image Gallery -->
+        <section class="py-6 px-4 bg-white">
+          <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-4 gap-3">
+              <template x-for="(img, idx) in selectedPackage.gallery" :key="idx">
+                <div class="rounded-xl overflow-hidden h-24 md:h-32 cursor-pointer">
+                  <img :src="img" :alt="'Gallery ' + (idx+1)" class="w-full h-full object-cover gallery-img">
+                </div>
+              </template>
+            </div>
+          </div>
+        </section>
+
+        <!-- Content -->
+        <section class="py-10 px-4">
+          <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-10">
+              <!-- Overview -->
+              <div>
+                <h2 class="text-2xl font-poppins font-bold text-gray-900 mb-4">Overview</h2>
+                <p class="text-gray-600 leading-relaxed" x-text="selectedPackage.overview"></p>
+              </div>
+
+              <!-- Itinerary -->
+              <div>
+                <h2 class="text-2xl font-poppins font-bold text-gray-900 mb-6">Day-by-Day Plan</h2>
+                <div class="space-y-0">
+                  <template x-for="(day, idx) in selectedPackage.itinerary" :key="idx">
+                    <div class="flex gap-4 pb-8 itinerary-line">
+                      <div class="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center text-sm font-bold z-10" x-text="idx+1"></div>
+                      <div class="bg-gray-50 rounded-xl p-5 flex-1 border border-gray-100">
+                        <h4 class="font-poppins font-semibold text-gray-900 mb-1" x-text="'Day ' + (idx+1) + ': ' + day.title"></h4>
+                        <p class="text-gray-500 text-sm" x-text="day.desc"></p>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Inclusions -->
+              <div>
+                <h2 class="text-2xl font-poppins font-bold text-gray-900 mb-4">Inclusions</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <template x-for="inc in selectedPackage.inclusions" :key="inc">
+                    <div class="flex items-center text-sm text-gray-600">
+                      <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                      <span x-text="inc"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Exclusions -->
+              <div>
+                <h2 class="text-2xl font-poppins font-bold text-gray-900 mb-4">Exclusions</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <template x-for="exc in selectedPackage.exclusions" :key="exc">
+                    <div class="flex items-center text-sm text-gray-600">
+                      <svg class="w-5 h-5 text-red-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                      <span x-text="exc"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar (Sticky Price Card) -->
+            <div class="lg:col-span-1">
+              <div class="sticky top-24 bg-white rounded-2xl shadow-xl border border-gray-100 p-6 space-y-6">
+                <div>
+                  <span class="text-sm text-gray-400">Starting from</span>
+                  <p class="text-4xl font-poppins font-bold text-primary-600" x-text="selectedPackage.price"></p>
+                  <span class="text-sm text-gray-400">per person</span>
+                </div>
+                <div class="space-y-3 text-sm">
+                  <div class="flex items-center text-gray-600">
+                    <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span x-text="selectedPackage.duration"></span>
+                  </div>
+                  <div class="flex items-center text-gray-600">
+                    <svg class="w-5 h-5 text-primary-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span x-text="selectedPackage.destination"></span>
+                  </div>
+                </div>
+                <a :href="'https://wa.me/919876543210?text=' + encodeURIComponent('Hello, I\'m interested in the package:\n' + selectedPackage.title + '\n\nPage: ' + window.location.href)"
+                   target="_blank"
+                   class="flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-green-500/30">
+                  <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Enquire on WhatsApp
+                </a>
+                <p class="text-center text-xs text-gray-400">No spam, no forms. Just a quick chat!</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </template>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: TOURS (BLOG STYLE) -->
+  <!-- ============================================================ -->
+  <div x-show="page==='tours'" x-cloak class="fade-in pt-24">
+    <section class="py-12 px-4">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+          <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Travel Stories</p>
+          <h1 class="text-3xl md:text-5xl font-poppins font-bold text-gray-900 mb-4">Tour Guides & Blogs</h1>
+          <p class="text-gray-500 max-w-xl mx-auto">Read about our tours, travel tips, and destination guides to plan your perfect trip.</p>
+        </div>
+
+        <!-- Blog list -->
+        <div class="space-y-8">
+          <template x-for="pkg in packages" :key="pkg.id">
+            <article class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 card-hover cursor-pointer flex flex-col md:flex-row"
+                     @click="selectedPackage=pkg; page='detail'; window.scrollTo(0,0)">
+              <div class="md:w-80 h-56 md:h-auto flex-shrink-0 overflow-hidden">
+                <img :src="pkg.image" :alt="pkg.title" class="w-full h-full object-cover gallery-img">
+              </div>
+              <div class="p-6 md:p-8 flex flex-col justify-center">
+                <div class="flex items-center gap-3 mb-3">
+                  <span class="bg-primary-50 text-primary-700 text-xs font-bold px-3 py-1 rounded-full" x-text="pkg.destination"></span>
+                  <span class="text-gray-400 text-xs" x-text="pkg.duration"></span>
+                </div>
+                <h2 class="font-poppins font-bold text-xl md:text-2xl text-gray-900 mb-3" x-text="pkg.title"></h2>
+                <p class="text-gray-500 text-sm mb-4 line-clamp-3" x-text="pkg.overview"></p>
+                <div class="flex items-center justify-between">
+                  <span class="text-primary-600 font-bold text-lg" x-text="pkg.price"></span>
+                  <span class="text-primary-600 font-semibold text-sm flex items-center group">
+                    Read More
+                    <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                  </span>
+                </div>
+              </div>
+            </article>
+          </template>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: ABOUT -->
+  <!-- ============================================================ -->
+  <div x-show="page==='about'" x-cloak class="fade-in pt-20">
+    <!-- About Hero -->
+    <section class="relative h-[40vh] overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1920&q=80" alt="About" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-primary-900/60"></div>
+      <div class="absolute inset-0 flex items-center justify-center text-center px-4">
+        <div>
+          <h1 class="text-4xl md:text-6xl font-poppins font-bold text-white mb-4">About JourneyTrails</h1>
+          <p class="text-white/80 text-lg max-w-xl mx-auto">Your trusted travel partner for discovering the most beautiful corners of India and beyond.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="py-16 px-4 bg-white">
+      <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Our Story</p>
+          <h2 class="text-3xl font-poppins font-bold text-gray-900 mb-6">Crafting Journeys Since 2015</h2>
+          <p class="text-gray-600 mb-4 leading-relaxed">
+            JourneyTrails was born from a simple belief: travel should be easy, affordable, and memorable. Founded by a team of passionate travelers, we've been curating exceptional travel experiences across India for years.
+          </p>
+          <p class="text-gray-600 mb-6 leading-relaxed">
+            From the snow-capped peaks of Kashmir to the tranquil backwaters of Kerala, we bring you handpicked itineraries that combine adventure, culture, and comfort. Our packages are designed by people who've walked every trail themselves.
+          </p>
+          <div class="grid grid-cols-3 gap-6">
+            <div class="text-center">
+              <p class="text-3xl font-poppins font-bold text-primary-600">500+</p>
+              <p class="text-sm text-gray-500">Happy Travelers</p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-poppins font-bold text-primary-600">50+</p>
+              <p class="text-sm text-gray-500">Destinations</p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-poppins font-bold text-primary-600">8+</p>
+              <p class="text-sm text-gray-500">Years</p>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80" alt="Travel" class="rounded-2xl h-48 w-full object-cover">
+          <img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=600&q=80" alt="Travel" class="rounded-2xl h-48 w-full object-cover mt-8">
+          <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80" alt="Travel" class="rounded-2xl h-48 w-full object-cover">
+          <img src="https://images.unsplash.com/photo-1504150558240-0b4fd8946624?w=600&q=80" alt="Travel" class="rounded-2xl h-48 w-full object-cover mt-8">
+        </div>
+      </div>
+    </section>
+
+    <!-- Mission -->
+    <section class="py-16 px-4 bg-gray-50">
+      <div class="max-w-4xl mx-auto text-center">
+        <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Our Mission</p>
+        <h2 class="text-3xl font-poppins font-bold text-gray-900 mb-6">Making Travel Accessible For Everyone</h2>
+        <p class="text-gray-600 text-lg leading-relaxed mb-8">
+          We believe every person deserves a break from routine. Our mission is to make travel planning effortless and affordable. No complicated forms, no hidden costs — just send us a WhatsApp message and let us handle the rest.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="bg-white rounded-2xl p-8 shadow-sm">
+            <div class="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold mb-2">Passion for Travel</h3>
+            <p class="text-gray-500 text-sm">We travel first, then recommend. Every package is tried and tested.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-8 shadow-sm">
+            <div class="w-14 h-14 bg-accent-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold mb-2">Community First</h3>
+            <p class="text-gray-500 text-sm">We support local businesses, guides, and homestays in every destination.</p>
+          </div>
+          <div class="bg-white rounded-2xl p-8 shadow-sm">
+            <div class="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold mb-2">Trust & Safety</h3>
+            <p class="text-gray-500 text-sm">Verified accommodations and reliable transport for a worry-free trip.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-16 px-4 bg-white">
+      <div class="max-w-4xl mx-auto text-center">
+        <p class="text-accent-500 font-semibold text-sm tracking-widest uppercase mb-2">Get In Touch</p>
+        <h2 class="text-3xl font-poppins font-bold text-gray-900 mb-6">Contact Us</h2>
+        <p class="text-gray-500 mb-10">We'd love to hear from you! Reach out on WhatsApp for the fastest response.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="bg-gray-50 rounded-2xl p-8">
+            <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold mb-2">WhatsApp</h3>
+            <a href="https://wa.me/919876543210" target="_blank" class="text-green-600 font-semibold hover:underline">+91 98765 43210</a>
+          </div>
+          <div class="bg-gray-50 rounded-2xl p-8">
+            <div class="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold mb-2">Email</h3>
+            <p class="text-primary-600 font-semibold">hello@journeytrails.in</p>
+          </div>
+          <div class="bg-gray-50 rounded-2xl p-8">
+            <div class="w-14 h-14 bg-accent-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <h3 class="font-poppins font-bold mb-2">Location</h3>
+            <p class="text-gray-600 text-sm">Chennai, Tamil Nadu, India</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER -->
+  <!-- ============================================================ -->
+  <footer class="bg-gray-900 text-white pt-16 pb-8 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        <!-- Brand -->
+        <div class="md:col-span-2">
+          <a href="#" @click.prevent="page='home'; window.scrollTo(0,0)" class="flex items-center space-x-2 mb-4">
+            <svg class="w-8 h-8 text-primary-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span class="text-xl font-poppins font-bold">Journey<span class="text-accent-500">Trails</span></span>
+          </a>
+          <p class="text-gray-400 text-sm max-w-sm mb-6">Discover the beauty of India with our curated travel packages. Your journey begins with a simple WhatsApp message.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-full flex items-center justify-center transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+            </a>
+            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-full flex items-center justify-center transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="#" class="w-10 h-10 bg-gray-800 hover:bg-primary-600 rounded-full flex items-center justify-center transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="font-poppins font-bold text-lg mb-4">Quick Links</h4>
+          <ul class="space-y-2">
+            <li><a href="#" @click.prevent="page='home'; window.scrollTo(0,0)" class="text-gray-400 hover:text-white transition-colors text-sm">Home</a></li>
+            <li><a href="#" @click.prevent="page='packages'; window.scrollTo(0,0)" class="text-gray-400 hover:text-white transition-colors text-sm">Packages</a></li>
+            <li><a href="#" @click.prevent="page='tours'; window.scrollTo(0,0)" class="text-gray-400 hover:text-white transition-colors text-sm">Tours</a></li>
+            <li><a href="#" @click.prevent="page='about'; window.scrollTo(0,0)" class="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div>
+          <h4 class="font-poppins font-bold text-lg mb-4">Contact</h4>
+          <ul class="space-y-3 text-sm text-gray-400">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+              <a href="https://wa.me/919876543210" target="_blank" class="hover:text-white">+91 98765 43210</a>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 text-primary-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              <span>hello@journeytrails.in</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 text-accent-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+              <span>Chennai, Tamil Nadu, India</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+        <p>&copy; 2025 JourneyTrails. All rights reserved. | Crafted with love for travelers.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- ALPINE.JS APP DATA -->
+  <!-- ============================================================ -->
+  <script>
+    function app() {
+      return {
+        page: 'home',
+        scrolled: false,
+        mobileMenu: false,
+        selectedPackage: null,
+        activeFilter: 'all',
+        filterValue: '',
+
+        navItems: [
+          { id: 'home', label: 'Home' },
+          { id: 'packages', label: 'Packages' },
+          { id: 'tours', label: 'Tours' },
+          { id: 'about', label: 'About' },
+        ],
+
+        budgetFilters: [
+          { label: 'Under 10K', min: 0, max: 10000 },
+          { label: '10K - 20K', min: 10000, max: 20000 },
+          { label: '20K - 40K', min: 20000, max: 40000 },
+          { label: '40K+', min: 40000, max: 999999 },
+        ],
+
+        destinations: [
+          { name: 'Kashmir', image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80', count: 4, span: true },
+          { name: 'Kerala', image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&q=80', count: 3 },
+          { name: 'Goa', image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&q=80', count: 2 },
+          { name: 'Rajasthan', image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=600&q=80', count: 3 },
+          { name: 'Andaman', image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80', count: 2 },
+          { name: 'Himachal', image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&q=80', count: 3 },
+        ],
+
+        testimonials: [
+          { name: 'Priya Sharma', trip: 'Kashmir Trip', text: 'JourneyTrails made our Kashmir trip absolutely magical. The itinerary was perfect and the support was incredible. Highly recommend!' },
+          { name: 'Rajesh Kumar', trip: 'Kerala Backwaters', text: 'From the houseboat stay to the spice plantation visit, everything was flawlessly organized. Best travel experience we ever had.' },
+          { name: 'Anitha Menon', trip: 'Goa Getaway', text: 'Quick response on WhatsApp, great pricing, and amazing hotel recommendations. Will definitely book again for our next vacation!' },
+        ],
+
+        packages: [
+          {
+            id: 1,
+            title: 'Magical Kashmir Valley',
+            slug: 'magical-kashmir-valley',
+            destination: 'Kashmir',
+            price: '\u20B918,999',
+            priceNum: 18999,
+            duration: '6 Days / 5 Nights',
+            durationDays: 6,
+            tag: 'Bestseller',
+            image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80',
+            gallery: [
+              'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80',
+              'https://images.unsplash.com/photo-1595815771614-ade501084b76?w=400&q=80',
+              'https://images.unsplash.com/photo-1567157577867-05ccb1388e13?w=400&q=80',
+              'https://images.unsplash.com/photo-1597074866923-dc0589150458?w=400&q=80'
+            ],
+            description: 'Experience the paradise on earth with shikara rides, Mughal gardens, and snow-capped mountains.',
+            overview: 'Embark on a mesmerizing journey through the Kashmir Valley, often called "Paradise on Earth." This 6-day tour takes you through Srinagar\'s iconic Dal Lake, the alpine meadows of Gulmarg, the pine forests of Pahalgam, and the breathtaking Sonmarg. Stay in traditional houseboats, enjoy shikara rides at sunset, and experience the warmth of Kashmiri hospitality. Perfect for couples, families, and nature lovers.',
+            itinerary: [
+              { title: 'Arrival in Srinagar', desc: 'Airport pickup, check into houseboat on Dal Lake. Evening shikara ride with Kashmiri kahwa.' },
+              { title: 'Gulmarg Excursion', desc: 'Drive to Gulmarg. Gondola ride to Apharwat Peak. Explore the meadows and enjoy views of Nanga Parbat.' },
+              { title: 'Pahalgam Adventure', desc: 'Drive to Pahalgam via Saffron fields. Visit Betaab Valley and Aru Valley. Optional pony ride.' },
+              { title: 'Sonmarg Day Trip', desc: 'Visit the "Meadow of Gold." See Thajiwas Glacier. Enjoy the scenic beauty of zero-point.' },
+              { title: 'Srinagar Sightseeing', desc: 'Visit Mughal Gardens - Nishat, Shalimar, Chashme Shahi. Shopping at local markets for handicrafts.' },
+              { title: 'Departure', desc: 'Breakfast and transfer to Srinagar airport. Tour ends with beautiful memories.' }
+            ],
+            inclusions: ['5 Nights accommodation', 'Daily breakfast & dinner', 'Airport transfers', 'All sightseeing by private cab', 'Shikara ride on Dal Lake', 'Houseboat stay (1 night)', 'Gondola tickets (Phase 1)'],
+            exclusions: ['Airfare', 'Lunch', 'Personal expenses', 'Adventure activities', 'Tips & gratuities']
+          },
+          {
+            id: 2,
+            title: 'Kerala Backwater Bliss',
+            slug: 'kerala-backwater-bliss',
+            destination: 'Kerala',
+            price: '\u20B915,499',
+            priceNum: 15499,
+            duration: '5 Days / 4 Nights',
+            durationDays: 5,
+            tag: 'Popular',
+            image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80',
+            gallery: [
+              'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400&q=80',
+              'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?w=400&q=80',
+              'https://images.unsplash.com/photo-1609340667484-1c6c4a160a4e?w=400&q=80',
+              'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=400&q=80'
+            ],
+            description: 'Cruise through serene backwaters, explore tea plantations, and relax on pristine beaches.',
+            overview: 'Discover God\'s Own Country with this enchanting 5-day Kerala tour. From the misty tea gardens of Munnar to the tranquil backwaters of Alleppey, this package offers the best of Kerala. Enjoy a night on a luxury houseboat, visit spice plantations, witness Kathakali performances, and unwind on Kovalam Beach. A perfect blend of nature, culture, and relaxation.',
+            itinerary: [
+              { title: 'Arrival in Cochin', desc: 'Airport pickup, visit Fort Kochi, Chinese Fishing Nets, and St. Francis Church. Evening Kathakali show.' },
+              { title: 'Cochin to Munnar', desc: 'Scenic drive through tea plantations. Visit Mattupetty Dam, Echo Point, and Tea Museum.' },
+              { title: 'Munnar to Alleppey', desc: 'Drive to Alleppey. Board luxury houseboat for an overnight cruise through backwaters. Traditional Kerala lunch on board.' },
+              { title: 'Alleppey to Kovalam', desc: 'Morning at leisure. Drive to Kovalam Beach. Evening sunset at the lighthouse beach.' },
+              { title: 'Departure', desc: 'Morning Ayurvedic massage (optional). Transfer to Trivandrum airport.' }
+            ],
+            inclusions: ['4 Nights accommodation', 'Daily breakfast', 'Houseboat stay with meals', 'Airport transfers', 'All sightseeing by AC cab', 'Kathakali show tickets'],
+            exclusions: ['Airfare', 'Lunch & dinner (except houseboat)', 'Ayurvedic treatments', 'Water sports', 'Personal expenses']
+          },
+          {
+            id: 3,
+            title: 'Goa Beach Carnival',
+            slug: 'goa-beach-carnival',
+            destination: 'Goa',
+            price: '\u20B98,999',
+            priceNum: 8999,
+            duration: '4 Days / 3 Nights',
+            durationDays: 4,
+            tag: 'Budget',
+            image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80',
+            gallery: [
+              'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400&q=80',
+              'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80',
+              'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&q=80',
+              'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=80'
+            ],
+            description: 'Sun, sand, and sea! Enjoy Goa\'s famous beaches, nightlife, and Portuguese heritage.',
+            overview: 'The ultimate Goa getaway! This 4-day package covers the best beaches of North and South Goa, historic Portuguese churches, vibrant flea markets, and exciting water sports. Stay at a beach-facing resort, enjoy fresh seafood, and dance the night away at beach shacks. Whether you\'re a party lover or a peace seeker, Goa has something for everyone.',
+            itinerary: [
+              { title: 'Arrival & North Goa', desc: 'Airport pickup. Visit Calangute, Baga, and Anjuna beaches. Evening at Tito\'s Lane.' },
+              { title: 'Old Goa Heritage', desc: 'Visit Basilica of Bom Jesus, Se Cathedral. Afternoon at Dona Paula viewpoint. Miramar Beach sunset.' },
+              { title: 'South Goa & Water Sports', desc: 'Visit Colva and Palolem beaches. Water sports: parasailing, jet ski, banana ride. Spice plantation tour.' },
+              { title: 'Departure', desc: 'Morning at leisure for shopping at Mapusa Market. Transfer to airport.' }
+            ],
+            inclusions: ['3 Nights beach resort', 'Daily breakfast', 'Airport transfers', 'North & South Goa sightseeing', 'AC cab for all tours'],
+            exclusions: ['Airfare', 'Lunch & dinner', 'Water sports charges', 'Nightlife expenses', 'Personal shopping']
+          },
+          {
+            id: 4,
+            title: 'Royal Rajasthan Heritage',
+            slug: 'royal-rajasthan-heritage',
+            destination: 'Rajasthan',
+            price: '\u20B924,999',
+            priceNum: 24999,
+            duration: '7 Days / 6 Nights',
+            durationDays: 7,
+            tag: 'Premium',
+            image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800&q=80',
+            gallery: [
+              'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&q=80',
+              'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=80',
+              'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80',
+              'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80'
+            ],
+            description: 'Explore majestic forts, vibrant bazaars, and the golden sands of the Thar Desert.',
+            overview: 'Step into the land of kings with this grand 7-day Rajasthan tour. Visit the Pink City of Jaipur, the Blue City of Jodhpur, the Golden City of Jaisalmer, and the romantic Lake City of Udaipur. Experience desert camping under the stars, explore magnificent forts and palaces, shop in colorful bazaars, and savor authentic Rajasthani cuisine. A royal experience you\'ll never forget.',
+            itinerary: [
+              { title: 'Arrival in Jaipur', desc: 'Airport pickup. Visit Hawa Mahal and Jantar Mantar. Evening at Johari Bazaar.' },
+              { title: 'Jaipur Sightseeing', desc: 'Amber Fort elephant ride, City Palace, Nahargarh Fort sunset. Traditional Rajasthani dinner.' },
+              { title: 'Jaipur to Jodhpur', desc: 'Drive to Jodhpur. Visit Mehrangarh Fort, Jaswant Thada. Walk through the blue streets of old city.' },
+              { title: 'Jodhpur to Jaisalmer', desc: 'Drive to the Golden City. Visit Jaisalmer Fort, Patwon Ki Haveli. Evening at Gadisar Lake.' },
+              { title: 'Desert Safari', desc: 'Sam Sand Dunes camel safari. Desert camping with folk music, dance, and dinner under stars.' },
+              { title: 'Jaisalmer to Udaipur', desc: 'Drive to Udaipur. Visit City Palace, Jagdish Temple. Evening boat ride on Lake Pichola.' },
+              { title: 'Departure', desc: 'Morning visit to Saheliyon Ki Bari. Transfer to Udaipur airport.' }
+            ],
+            inclusions: ['6 Nights accommodation (hotels + desert camp)', 'Daily breakfast & dinner', 'Airport transfers', 'All sightseeing by AC cab', 'Desert camping with entertainment', 'Amber Fort elephant ride', 'Lake Pichola boat ride'],
+            exclusions: ['Airfare', 'Lunch', 'Monument entry fees', 'Camera charges', 'Personal expenses']
+          },
+          {
+            id: 5,
+            title: 'Andaman Island Escape',
+            slug: 'andaman-island-escape',
+            destination: 'Andaman',
+            price: '\u20B932,999',
+            priceNum: 32999,
+            duration: '6 Days / 5 Nights',
+            durationDays: 6,
+            tag: 'Honeymoon',
+            image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&q=80',
+            gallery: [
+              'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&q=80',
+              'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=400&q=80',
+              'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400&q=80',
+              'https://images.unsplash.com/photo-1468413253725-0d5181091126?w=400&q=80'
+            ],
+            description: 'Crystal-clear waters, pristine beaches, and thrilling underwater adventures await.',
+            overview: 'Escape to the tropical paradise of the Andaman Islands. This 6-day tour covers the pristine beaches of Havelock Island (Swaraj Dweep), the historic Cellular Jail in Port Blair, the coral reefs of Neil Island, and the natural wonders of Baratang. Perfect for honeymooners and beach lovers. Snorkel with colorful fish, watch bioluminescent plankton, and relax on Asia\'s best beach - Radhanagar.',
+            itinerary: [
+              { title: 'Arrival in Port Blair', desc: 'Airport pickup. Visit Cellular Jail. Evening Light & Sound show at the jail.' },
+              { title: 'Port Blair to Havelock', desc: 'Ferry to Havelock Island. Visit Radhanagar Beach (Asia\'s Best Beach). Sunset by the sea.' },
+              { title: 'Havelock Exploration', desc: 'Snorkeling at Elephant Beach. Kayaking through mangroves. Scuba diving (optional).' },
+              { title: 'Havelock to Neil Island', desc: 'Ferry to Neil Island. Visit Natural Bridge, Laxmanpur Beach sunset, Bharatpur Beach.' },
+              { title: 'Neil to Port Blair', desc: 'Ferry back. Visit Chidiya Tapu (Bird Island) for sunset. Corbyn\'s Cove Beach.' },
+              { title: 'Departure', desc: 'Visit Samudrika Marine Museum. Shopping at Aberdeen Bazaar. Airport transfer.' }
+            ],
+            inclusions: ['5 Nights accommodation', 'Daily breakfast', 'All ferry tickets', 'Airport & jetty transfers', 'Sightseeing as per itinerary', 'Snorkeling equipment', 'Light & Sound show tickets'],
+            exclusions: ['Airfare', 'Lunch & dinner', 'Scuba diving charges', 'Water sports', 'Personal expenses', 'Camera fees at monuments']
+          },
+          {
+            id: 6,
+            title: 'Himachal Hill Station Tour',
+            slug: 'himachal-hill-station-tour',
+            destination: 'Himachal',
+            price: '\u20B914,999',
+            priceNum: 14999,
+            duration: '5 Days / 4 Nights',
+            durationDays: 5,
+            tag: 'Family',
+            image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80',
+            gallery: [
+              'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400&q=80',
+              'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=400&q=80',
+              'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
+              'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80'
+            ],
+            description: 'Cool mountain air, pine forests, and charming hill stations of Himachal Pradesh.',
+            overview: 'Beat the heat with this refreshing 5-day Himachal Pradesh tour covering the queen of hills - Shimla, the hippie haven of Kasol, and the adventure capital Manali. Enjoy toy train rides, river rafting, paragliding, and walks through apple orchards. Stay in cozy mountain lodges and wake up to panoramic Himalayan views. Ideal for families, friends, and solo travelers.',
+            itinerary: [
+              { title: 'Arrival in Shimla', desc: 'Pickup from Chandigarh. Drive to Shimla. Evening walk on Mall Road and Ridge.' },
+              { title: 'Shimla & Kufri', desc: 'Visit Kufri, Jakhoo Temple, Christ Church. Toy train ride (heritage). Shopping at Lakkar Bazaar.' },
+              { title: 'Shimla to Manali', desc: 'Scenic drive via Kullu Valley. Stop at Kullu for river rafting. Arrive Manali by evening.' },
+              { title: 'Manali Sightseeing', desc: 'Visit Solang Valley, Hadimba Temple, Old Manali. Paragliding (optional). Van Vihar evening walk.' },
+              { title: 'Departure', desc: 'Visit Naggar Castle and Roerich Art Gallery. Drive to Chandigarh for departure.' }
+            ],
+            inclusions: ['4 Nights accommodation', 'Daily breakfast & dinner', 'Chandigarh transfers', 'All sightseeing by AC cab', 'River rafting in Kullu', 'Toy train tickets'],
+            exclusions: ['Airfare/train to Chandigarh', 'Lunch', 'Paragliding & adventure sports', 'Personal expenses', 'Rohtang Pass permits']
+          }
+        ],
+
+        filteredPackages() {
+          if (this.activeFilter === 'all') return this.packages;
+          if (this.activeFilter === 'destination') {
+            return this.packages.filter(p => p.destination === this.filterValue);
+          }
+          if (this.activeFilter === 'budget') {
+            const budget = this.budgetFilters.find(b => b.label === this.filterValue);
+            if (!budget) return this.packages;
+            return this.packages.filter(p => p.priceNum >= budget.min && p.priceNum < budget.max);
+          }
+          if (this.activeFilter === 'duration') {
+            if (this.filterValue === '3-4 Days') return this.packages.filter(p => p.durationDays <= 4);
+            if (this.filterValue === '5-6 Days') return this.packages.filter(p => p.durationDays >= 5 && p.durationDays <= 6);
+            if (this.filterValue === '7+ Days') return this.packages.filter(p => p.durationDays >= 7);
+          }
+          return this.packages;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
